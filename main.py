@@ -114,5 +114,14 @@ plt.xlabel('Prediction')
 plt.ylabel('Label')
 plt.show()
 
+# Hiển thị 5 hình ảnh và dự đoán của mô hình
+predictions = model.predict(x_test)
+
+for i in range(5):
+    plt.imshow(x_test[i].reshape(28, 28), cmap='gray')
+    plt.title(f"Dự đoán: {np.argmax(predictions[i])}")
+    plt.axis('off')
+    plt.show()
+
 # 10. Lưu mô hình (Optional)
 model.save('my_model.keras')
