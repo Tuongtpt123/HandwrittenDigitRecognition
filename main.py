@@ -1,28 +1,29 @@
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 from tensorflow.keras.utils import to_categorical
-import pandas as pd
 from sklearn.metrics import confusion_matrix
-import seaborn as sns
 
-# Tải tập dữ liệu MNIST
+# Tải & tiền xử lý dữ liệu
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
-# Chuẩn hóa dữ liệu
+# Chuẩn hóa dữ liệu (đưa về giá trị từ 0 đến 1)
 x_train = x_train / 255.0
 x_test = x_test / 255.0
 
-# Thêm một kênh (channel) cho dữ liệu
+# Thêm chiều kênh (1 kênh grayscale)
 x_train = x_train.reshape(-1, 28, 28, 1)
 x_test = x_test.reshape(-1, 28, 28, 1)
 
-# One-hot encode nhãn
+# One-hot encode cho nhãn (giúp chuyển nhãn từ dạng số nguyên (0-9) sang vector one-hot để phù hợp với cách mô hình CNN hoạt động)
 y_train = to_categorical(y_train, 10)
 y_test = to_categorical(y_test, 10)
 
-#Xây dựng mô hình CNN:
+#Xây dựng mô hình CNN
 model = Sequential([
     Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
     MaxPooling2D((2, 2)),
@@ -33,38 +34,19 @@ model = Sequential([
     Dense(10, activation='softmax')
 ])
 
-#Biên dịch và huấn luyện mô hình:
+#Biên dịch và huấn luyện mô hình
 model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-history = model.fit(x_train, y_train, epochs=5, batch_size=32, validation_split=0.2)
+# 4. Huấn luyện mô hình và lưu lịch sử
+history = model.fit(x_train, y_train, epochs=10, batch_size=32, validation_split=0.2)
 
-#Đánh giá và kiểm tra:
+# Đánh giá mô hình trên tập kiểm tra
 test_loss, test_acc = model.evaluate(x_test, y_test)
 print(f"Accuracy: {test_acc:.2%}")
 
-# #Lưu và tải lại mô hình: (Ẩn đi nếu không muốn lưu lại kết quả train và sử dụng lần sau
-# # Lưu mô hình
-# model.save('mnist_cnn_model.h5')
-
-# # # Tải lại mô hình
-# loaded_model = tf.keras.models.load_model('mnist_cnn_model.h5')
-
 #Trực quan hóa kết quả:
-import matplotlib.pyplot as plt
-
-predictions = model.predict(x_test)
-
-# Hiển thị 5 hình ảnh và dự đoán của mô hình
-for i in range(5):
-    plt.imshow(x_test[i].reshape(28, 28), cmap='gray')
-    plt.title(f"Dự đoán: {np.argmax(predictions[i])}")
-    plt.axis('off')
-    plt.show()
-
-
-# Vẽ biểu đồ Độ chính xác
 plt.figure(figsize=(12, 5))
 
 # Độ chính xác
@@ -91,12 +73,11 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
-# Dự đoán nhãn trên tập kiểm tra
+# Tính toán độ chính xác cho từng class
 y_pred = model.predict(x_test)
 y_pred_classes = np.argmax(y_pred, axis=1)  # Chọn nhãn có xác suất cao nhất
 y_true = np.argmax(y_test, axis=1)  # Nhãn thực tế
 
-# Tính toán độ chính xác cho từng class
 classes = np.unique(y_true)
 accuracy_per_class = []
 samples_per_class = []
@@ -105,7 +86,6 @@ for cls in classes:
     cls_idx = np.where(y_true == cls)[0]  # Lấy index của các mẫu thuộc lớp `cls`
     correct_predictions = np.sum(y_pred_classes[cls_idx] == cls)
     accuracy = correct_predictions / len(cls_idx)
-    
     accuracy_per_class.append(accuracy)
     samples_per_class.append(len(cls_idx))
 
@@ -133,3 +113,6 @@ plt.title('Confusion Matrix')
 plt.xlabel('Prediction')
 plt.ylabel('Label')
 plt.show()
+
+# 10. Lưu mô hình (Optional)
+model.save('my_model.keras')
