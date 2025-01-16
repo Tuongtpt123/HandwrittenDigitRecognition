@@ -45,6 +45,7 @@ history = model.fit(x_train, y_train, epochs=10, batch_size=32, validation_split
 # Đánh giá mô hình trên tập kiểm tra
 test_loss, test_acc = model.evaluate(x_test, y_test)
 print(f"Accuracy: {test_acc:.2%}")
+print(f"Loss: {test_loss:.2%}")
 
 #Trực quan hóa kết quả:
 plt.figure(figsize=(12, 5))
@@ -111,7 +112,7 @@ plt.figure(figsize=(8, 6))
 sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes)
 plt.title('Confusion Matrix')
 plt.xlabel('Prediction')
-plt.ylabel('Label')
+plt.ylabel('Class')
 plt.show()
 
 # Hiển thị 5 hình ảnh và dự đoán của mô hình
